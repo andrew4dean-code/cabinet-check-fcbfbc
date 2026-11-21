@@ -167,7 +167,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
         <li><b>Drawn twice, ordered once:</b> W3636B, WF642, and BBC42/45-PO-L each show on both the sink wall and range wall drawings. Each is one piece.</li>
         <li><b>Same code, two rooms:</b> WF330 is used at the kitchen corner and again at the basement vanity.</li>
         <li><b>Kitchen and bath shipped as one order.</b> An extra piece in the kitchen may belong to a bathroom. Type its code above to see where it goes.</li>
-        <li><b>Fridge sides:</b> each side has two pieces, a 1½" REF96 panel plus a ¼" PQTR skin on its outer face. That is 4 pieces total, 39½" across with the 36" opening. Both PQTR skins can be cut from one 48" by 96" sheet, so one PQTR box does not mean one is missing.</li>
+        <li><b>Fridge sides:</b> each side has two pieces, a 1½" REF96 panel plus a ¼" PQTR skin on its outer face. That is 4 pieces total, 39½" across with the 36" opening. Two 48" by 96" PQTR sheets are on site. One makes both skins, so keep the second for the island back or toe kick if those parts did not arrive.</li>
         <li><b>Blind corner:</b> BBC42/45-PO-L is a 39" box set 5½" off the sink wall. The gap behind it is on purpose.</li>
         <li><b>Toe kick:</b> the drawings say Toekick: Yes and draw 8 runs but list no toe kick part. Job photos show raw toe space. Ask the supplier whether finished toe kick was included.</li>
         <li><b>Island back:</b> PHLF is the panel drawn on the back of the island. The back was still raw in the Nov 20 photo.</li>
@@ -501,11 +501,11 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     { code: 'BF09PO', name: '9" base with full-height door and pull-out', w: 9, ...baseFacts, count: 1, plateW: 8, build: (g) => baseCab(g, 9, [[30, 'pullout']]) },
     { code: 'C2S900P2MS1', name: 'Range', w: 29.875, h: 36.25, layer: 'appliance', appliance: 1, plateY: 19.5, plateZ: 27.2, build: (g) => range(g, 29.875) },
     { code: 'DB24', name: '3-drawer base', w: 24, ...baseFacts, count: 1, build: (g) => baseCab(g, 24, THREE_DRAWER) },
-    { code: 'PQTR', name: '¼" skin on left fridge panel, DB24 side', note: 'There is one on each side of the fridge, on the outer face of the REF96 panel. On this side it sits between the REF96 and DB24, so it is hard to see once installed. Both skins can be cut from one 48" by 96" PQTR sheet, so one box is enough. The sheet is finished on one side only.', w: 0.25, h: 90, d: 24, build: (g) => panel(g, 0.25, 90, 24) },
+    { code: 'PQTR', name: '¼" skin on left fridge panel, DB24 side', note: 'There is one on each side of the fridge, on the outer face of the REF96 panel. On this side it sits between the REF96 and DB24, so it is hard to see once installed. Two PQTR sheets are on site. One 48" by 96" sheet makes both fridge skins, so the second is spare. Each sheet is finished on one side only.', w: 0.25, h: 90, d: 24, build: (g) => panel(g, 0.25, 90, 24) },
     { code: 'REF96', name: 'Left fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
     { code: 'GYE22GYNFS', name: 'Refrigerator', w: 36, size: '36" opening', h: 70.5, layer: 'appliance', appliance: 1, plateY: 50, plateZ: 28.1, plateX: 9.5, plateW: 15, build: (g) => fridge(g, 36) },
     { code: 'REF96', name: 'Right fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
-    { code: 'PQTR', name: '¼" skin on right fridge panel, exposed side', note: 'There is one on each side of the fridge, on the outer face of the REF96 panel. This one is the finished side you see at the end of the run, so keep the finished face out. Both skins can be cut from one 48" by 96" PQTR sheet, so one box is enough.', w: 0.25, h: 90, d: 24, build: (g) => panel(g, 0.25, 90, 24) },
+    { code: 'PQTR', name: '¼" skin on right fridge panel, exposed side', note: 'There is one on each side of the fridge, on the outer face of the REF96 panel. This one is the finished side you see at the end of the run, so keep the finished face out. Two PQTR sheets are on site. One makes both fridge skins, so the second is spare.', w: 0.25, h: 90, d: 24, build: (g) => panel(g, 0.25, 90, 24) },
   ]);
 
   const wallFacts = (h, d = 12) => ({ h, d, y: 54 + (36 - h), layer: 'upper', plateZ: d + 0.2 });
