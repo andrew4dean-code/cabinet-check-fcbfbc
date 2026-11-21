@@ -187,7 +187,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
         <li><b>Crown:</b> drawn with a joint at 96", so it takes at least 2 lengths. The run is about 189" with 3 mitered corners, and 2 lengths give only 192". Plan on a third length.</li>
         <li><b>REF96 fridge panels</b> come 96" tall and are drawn to about 90", so they get cut on site.</li>
         <li><b>Island location</b> has no dimension on the drawings. Its position here is scaled from a plan marked No Scale.</li>
-        <li><b>Appliances</b> are shown as drawn and are not part of the cabinet order. Confirm the final fridge fits the 36" opening.</li>
+        <li><b>Appliances</b> are not part of the cabinet order. The microwave is the Samsung ME16A4021AS, 29⅞" W x 16½" H x 15⅛" D. The fridge, range, and dishwasher are still shown as drawn. Confirm the final fridge fits the 36" opening.</li>
         <li>Countertop, sink, faucet, floor, wall color, and pulls are placeholders.</li>
       </ul>
     </section>
@@ -412,10 +412,10 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   }
 
   function microwave(g, w, h) {
-    bx(g, w - 0.1, h, 14.6, M.steel, w / 2, h / 2, 7.3);
-    bx(g, w - 8, h - 2.2, 0.5, M.glass, (w - 8) / 2 + 0.7, h / 2, 14.75);
-    bx(g, 5.8, h - 2.2, 0.5, M.dark, w - 3.4, h / 2, 14.75);
-    add(g, new THREE.CylinderGeometry(0.3, 0.3, h - 4, 10), M.steel, w - 7.1, h / 2, 15.4);
+    bx(g, w, h, 14.2, M.steel, w / 2, h / 2, 7.1);
+    bx(g, w - 8, h - 2.2, 0.5, M.glass, (w - 8) / 2 + 0.7, h / 2, 14.35);
+    bx(g, 5.8, h - 2.2, 0.5, M.dark, w - 3.4, h / 2, 14.35);
+    add(g, new THREE.CylinderGeometry(0.3, 0.3, h - 4, 10), M.steel, w - 7.1, h / 2, 14.82);
   }
 
   function fridge(g, w) {
@@ -532,9 +532,10 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     { code: 'W361824B', name: 'Deep cabinet over fridge', w: 36, ...wallFacts(18, 24), count: 1, build: (g) => wallCab(g, 36, 18, 24, 2) },
   ]);
 
-  place(run, 'range', 'Range wall, upper', 53.375, {
-    code: 'CVM517P2MS1', name: 'Over-the-range microwave', w: 30, h: 15.5, d: 15.4, y: 56.5, layer: 'appliance', appliance: 1,
-    plateX: 11, plateY: 7.75, plateZ: 15.1, plateW: 15, build: (g) => microwave(g, 30, 15.5),
+  place(run, 'range', 'Range wall, upper', 53.4375, {
+    code: 'ME16A4021AS', name: 'Samsung over-the-range microwave', w: 29.875, h: 16.5, d: 15.125, y: 55.5, layer: 'appliance', appliance: 1,
+    note: 'Replaces the CVM517P2MS1 on the plans. It hangs under W3018B, with its top at 72" and bottom at 55½" off the floor. It needs a 30" wide by 17" tall opening and at least 30" from the cabinet to the countertop or range. The power cord goes through a hole in the bottom of W3018B.',
+    plateX: 11, plateY: 8.25, plateZ: 14.68, plateW: 15, build: (g) => microwave(g, 29.875, 16.5),
   });
 
   function trimItem(group, def) {
@@ -921,7 +922,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     topMode = on;
     if (on) { savedLayers = { upper: inputs.upper.checked, counter: inputs.counter.checked }; setToggle('upper', false); setToggle('counter', false); }
     else if (savedLayers) { setToggle('upper', savedLayers.upper); setToggle('counter', savedLayers.counter); }
-    items.find((i) => i.code === 'CVM517P2MS1').group.visible = !on;
+    items.find((i) => i.code === 'ME16A4021AS').group.visible = !on;
     syncLayers();
   }
   let bathMode = false, sideMode = false;
