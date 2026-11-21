@@ -1,0 +1,1014 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Lee Street Kitchen</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a large 3D stage beside a job-sheet panel, using the drawing set's dimension blue as the accent. */
+:root {
+  --bg: #e9ebf0; --surface: #f8f9fb; --line: #d3d7e0; --fg: #191c28; --muted: #5a6072;
+  --accent: #1f2fa3; --accent-soft: #e1e4f7; --wood: #7b4a2b; --stage: #dfe2e9; --good: #14804a; --bad: #c62828; --on-status: #ffffff;
+  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11131a; --surface: #1a1d27; --line: #2d3140; --fg: #eceef4; --muted: #a0a6b8;
+    --accent: #a3afff; --accent-soft: #272c4d; --wood: #c58d62; --stage: #232735; --good: #3ecf85; --bad: #ff7b72; --on-status: #11131a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11131a; --surface: #1a1d27; --line: #2d3140; --fg: #eceef4; --muted: #a0a6b8;
+  --accent: #a3afff; --accent-soft: #272c4d; --wood: #c58d62; --stage: #232735; --good: #3ecf85; --bad: #ff7b72; --on-status: #11131a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px;
+}
+.app { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 400px; grid-template-rows: auto minmax(0, 1fr); gap: 12px 16px; }
+header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; }
+h1 { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
+header p { margin: 0; color: var(--muted); }
+.stage { position: relative; min-width: 0; min-height: 0; border-radius: 6px; overflow: hidden; background: var(--stage); border: 1px solid var(--line); }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+canvas:active { cursor: grabbing; }
+.views { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; flex-wrap: wrap; gap: 6px; pointer-events: none; }
+.views button {
+  pointer-events: auto; font: 600 13px var(--sans); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 4px; padding: 7px 11px; cursor: pointer;
+}
+.views button:hover { border-color: var(--accent); }
+.views button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.hint { position: absolute; left: 10px; bottom: 9px; margin: 0; padding: 3px 8px; font-size: 12px; color: var(--muted); background: var(--surface); border-radius: 3px; }
+.panel { min-width: 0; min-height: 0; overflow-y: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.panel section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.panel section:last-child { border-bottom: 0; }
+h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+#card { min-height: 128px; }
+#card .code { font: 600 19px var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+#card .name { margin: 2px 0 10px; font-size: 15px; font-weight: 500; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; }
+.facts div { min-width: 0; }
+.facts dt { font-size: 11px; color: var(--muted); }
+.facts dd { margin: 0; font: 500 14px var(--mono); font-variant-numeric: tabular-nums; }
+.totals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; }
+.totals b { display: block; font: 600 21px var(--mono); }
+.totals span { font-size: 12px; color: var(--muted); }
+.toggles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 10px; }
+.toggles label { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.toggles input { accent-color: var(--accent); width: 15px; height: 15px; margin: 0; }
+.group { margin: 10px 0 3px; font-weight: 600; font-size: 13px; }
+.group:first-of-type { margin-top: 0; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: center; border-bottom: 1px solid var(--line); padding-block: 2px; }
+.item[hidden] { display: none; }
+.row {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; align-items: baseline;
+  padding: 5px 6px; background: none; border: 0; border-radius: 3px; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.row .n { grid-column: 1 / -1; }
+.marks { display: flex; gap: 3px; }
+.mark { font: 600 12px var(--sans); padding: 6px 8px; border: 1px solid var(--line); border-radius: 3px; background: var(--surface); color: var(--muted); cursor: pointer; }
+.mark.here[aria-pressed="true"] { background: var(--good); border-color: var(--good); color: var(--on-status); }
+.mark.miss[aria-pressed="true"] { background: var(--bad); border-color: var(--bad); color: var(--on-status); }
+.tag { font-size: 11px; color: var(--muted); padding-right: 6px; }
+.totals.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.totals .bad { color: var(--bad); } .totals .good { color: var(--good); }
+.actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.btn { font: 600 13px var(--sans); padding: 7px 10px; border-radius: 4px; border: 1px solid var(--accent); background: var(--accent); color: var(--surface); cursor: pointer; }
+.btn.alt { background: var(--surface); color: var(--accent); }
+.small { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+.small:empty { display: none; }
+#out { width: 100%; height: 110px; margin-top: 8px; font: 12px var(--mono); background: var(--bg); color: var(--fg); border: 1px solid var(--line); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.chip { font: 600 12px var(--sans); padding: 5px 9px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+#extraForm { display: flex; gap: 6px; }
+#extraCode { flex: 1; min-width: 0; font: 500 14px var(--mono); padding: 7px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); }
+.extra { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.extra b { font: 600 13px var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+.extra p { grid-column: 1; margin: 0; font-size: 12.5px; color: var(--muted); }
+.extra button { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.note { margin: 10px 0 0; padding: 7px 9px; background: var(--accent-soft); border-radius: 3px; font-size: 13px; }
+.row:hover { background: var(--accent-soft); }
+.row[aria-current="true"] { background: var(--accent); color: var(--surface); }
+.row[aria-current="true"] .c, .row[aria-current="true"] .d { color: inherit; }
+.row .c { font: 500 12px var(--mono); color: var(--accent); overflow-wrap: anywhere; }
+.row .n { font-size: 13px; }
+.row .d { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.notes { margin: 0; padding-left: 17px; display: grid; gap: 6px; font-size: 13px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fail { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
+@media (max-width: 860px) {
+  html, body { height: auto; }
+  .app { height: auto; display: flex; flex-direction: column; }
+  .stage { height: 64vh; min-height: 380px; }
+  .panel { overflow: visible; }
+  .views button { padding: 6px 8px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <h1>Lee Street Kitchen</h1>
+    <p>Piece check built from the Aug 4, 2026 cabinet drawings.</p>
+  </header>
+
+  <main class="stage" id="stage">
+    <canvas id="view" aria-label="Interactive 3D model of the kitchen cabinets"></canvas>
+    <div class="views" id="views" role="group" aria-label="Camera views"></div>
+    <p class="hint" id="hint">Drag to turn. Scroll or pinch to zoom. Click a cabinet to identify it.</p>
+  </main>
+
+  <aside class="panel">
+    <section id="card" aria-live="polite"></section>
+    <section>
+      <h2>Piece count</h2>
+      <div class="totals four" id="totals"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="copyList">Copy missing list</button>
+        <button type="button" class="btn alt" id="copyLink">Copy link with my marks</button>
+      </div>
+      <p class="small" id="msg" role="status"></p>
+      <textarea id="out" hidden readonly aria-label="Text to copy"></textarea>
+    </section>
+    <section>
+      <h2>Show</h2>
+      <div class="toggles" id="toggles"></div>
+    </section>
+    <section>
+      <h2>Check each piece</h2>
+      <div class="chips" id="filters" role="group" aria-label="Filter pieces"></div>
+      <div id="list"></div>
+    </section>
+    <section>
+      <h2>Extra pieces found</h2>
+      <form id="extraForm">
+        <input id="extraCode" list="codes" placeholder="Code on the box, like DB15" autocomplete="off" aria-label="Code on the extra piece">
+        <datalist id="codes"></datalist>
+        <button type="submit" class="btn">Add</button>
+      </form>
+      <p class="small" id="extraMsg"></p>
+      <div id="extras"></div>
+    </section>
+    <section>
+      <h2>Read before calling a piece missing</h2>
+      <ul class="notes">
+        <li><b>Drawn twice, ordered once:</b> W3636B, WF642, and BBC42/45-PO-L each show on both the sink wall and range wall drawings. Each is one piece.</li>
+        <li><b>Same code, two rooms:</b> WF330 is used at the kitchen corner and again at the basement vanity.</li>
+        <li><b>Kitchen and bath shipped as one order.</b> An extra piece in the kitchen may belong to a bathroom. Type its code above to see where it goes.</li>
+        <li><b>Toe kick:</b> the drawings say Toekick: Yes but list no toe kick part. Job photos show raw toe space. Ask the supplier whether finished toe kick was included.</li>
+        <li><b>Island back:</b> PHLF is the panel drawn on the back of the island. The back was still raw in the Nov 20 photo.</li>
+        <li><b>Crown:</b> drawn with a joint at 96", so it takes at least 2 lengths. The run is about 186" from 192" of material, which leaves little for cuts.</li>
+        <li><b>REF96 fridge panels</b> come 96" tall and are drawn to about 90", so they get cut on site.</li>
+        <li><b>Island location</b> has no dimension on the drawings. Its position here is scaled from a plan marked No Scale.</li>
+        <li><b>Appliances</b> are shown as drawn and are not part of the cabinet order. Confirm the final fridge fits the 36" opening.</li>
+        <li>Countertop, sink, faucet, floor, wall color, and pulls are placeholders.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Finish</h2>
+      <p style="margin:0">JSI Upton door, knotty maple, rustic brown stain. Framed, full overlay, plywood boxes, maple dovetail drawers, soft close.</p>
+    </section>
+  </aside>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function () {
+  'use strict';
+  const stage = document.getElementById('stage');
+  const canvas = document.getElementById('view');
+  if (!window.THREE || !THREE.OrbitControls) return fail('The 3D library did not load. Check your connection and reload.');
+
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true }); }
+  catch (e) { return fail('This browser could not start 3D graphics.'); }
+
+  function fail(msg) {
+    const d = document.createElement('div'); d.className = 'fail'; d.textContent = msg; stage.appendChild(d);
+  }
+
+  /* All model units are inches. X runs along the sink wall, Y is up, Z runs from the sink wall into the room. */
+  const ROOM = { sink: 128.5, range: 152, ceil: 94 };
+  const ISLAND = { x: 5.85, z: 62.9 };
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(36, 1, 1, 5000);
+  const controls = new THREE.OrbitControls(camera, canvas);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.09;
+  controls.maxPolarAngle = Math.PI * 0.495;
+  controls.minDistance = 25;
+  controls.maxDistance = 2600;
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xb9b2a6, 0.72));
+  const sun = new THREE.DirectionalLight(0xfff4e6, 0.72);
+  sun.position.set(-70, 210, 170);
+  sun.target.position.set(64, 0, 76);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  Object.assign(sun.shadow.camera, { left: -130, right: 130, top: 130, bottom: -130, near: 10, far: 520 });
+  sun.shadow.bias = -0.0006;
+  sun.shadow.radius = 4;
+  scene.add(sun, sun.target);
+  const fill = new THREE.DirectionalLight(0xdfe8ff, 0.24);
+  fill.position.set(60, 70, 220);
+  scene.add(fill);
+
+  let seed = 4217;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  function woodTexture() {
+    const c = document.createElement('canvas'); c.width = c.height = 1024;
+    const x = c.getContext('2d');
+    x.fillStyle = '#85522f'; x.fillRect(0, 0, 1024, 1024);
+    for (let i = 0; i < 26; i++) {
+      x.fillStyle = `rgba(${rnd() > 0.5 ? '160,105,62' : '84,48,26'},${0.05 + rnd() * 0.11})`;
+      x.fillRect(rnd() * 1024, 0, 18 + rnd() * 90, 1024);
+    }
+    for (let i = 0; i < 520; i++) {
+      const bx = rnd() * 1024, k = 1 + Math.floor(rnd() * 3), a = 2 + rnd() * 9, ph = rnd() * 6.28;
+      x.strokeStyle = rnd() > 0.45 ? `rgba(58,32,16,${0.05 + rnd() * 0.17})` : `rgba(186,132,86,${0.04 + rnd() * 0.1})`;
+      x.lineWidth = 0.5 + rnd() * 1.6;
+      x.beginPath();
+      for (let y = 0; y <= 1024; y += 16) {
+        const px = bx + Math.sin((y / 1024) * 6.283 * k + ph) * a;
+        y ? x.lineTo(px, y) : x.moveTo(px, y);
+      }
+      x.stroke();
+    }
+    for (let i = 0; i < 4; i++) {
+      const kx = 40 + rnd() * 944, ky = 40 + rnd() * 944, r = 3 + rnd() * 6;
+      const g = x.createRadialGradient(kx, ky, 0, kx, ky, r * 2.3);
+      g.addColorStop(0, 'rgba(38,21,11,.72)'); g.addColorStop(0.42, 'rgba(62,35,18,.45)'); g.addColorStop(1, 'rgba(80,47,25,0)');
+      x.fillStyle = g;
+      x.beginPath(); x.ellipse(kx, ky, r * 1.5, r * 2.5, 0, 0, 6.283); x.fill();
+      x.strokeStyle = 'rgba(40,22,11,.3)';
+      for (let j = 1; j < 4; j++) { x.beginPath(); x.ellipse(kx, ky, r * (1.3 + j * 0.45), r * (2.3 + j * 0.8), 0, 0, 6.283); x.stroke(); }
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return t;
+  }
+
+  const std = (o) => new THREE.MeshStandardMaterial(o);
+  const M = {
+    wood: std({ map: woodTexture(), roughness: 0.58 }),
+    box: std({ color: 0x3b2517, roughness: 0.85 }),
+    toe: std({ color: 0x4b2e1b, roughness: 0.8 }),
+    wall: std({ color: 0xe7e6e1, roughness: 0.95 }),
+    floor: std({ color: 0xc8c3b9, roughness: 0.78 }),
+    stone: std({ color: 0xece9e3, roughness: 0.26 }),
+    steel: std({ color: 0xc2c6cb, metalness: 0.32, roughness: 0.36 }),
+    dark: std({ color: 0x1d1e21, roughness: 0.42 }),
+    iron: std({ color: 0x101113, roughness: 0.7 }),
+    glass: std({ color: 0x2b3139, roughness: 0.1, metalness: 0.2 }),
+    pull: std({ color: 0x232120, metalness: 0.55, roughness: 0.4 }),
+    frame: std({ color: 0xf6f5f1, roughness: 0.6 }),
+    sky: new THREE.MeshBasicMaterial({ color: 0xcfe2f1 }),
+  };
+
+  function add(p, geo, mat, x, y, z) {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; p.add(m);
+    return m;
+  }
+  const bx = (p, w, h, d, mat, x, y, z) => add(p, new THREE.BoxGeometry(w, h, d), mat, x, y, z);
+
+  function wd(p, w, h, d, x, y, z, horizontal) {
+    const g = new THREE.BoxGeometry(w, h, d), uv = g.attributes.uv;
+    const sizes = [[d, h], [d, h], [w, d], [w, d], [w, h], [w, h]], ou = rnd(), ov = rnd(), S = 64;
+    for (let f = 0; f < 6; f++) for (let i = 0; i < 4; i++) {
+      const n = f * 4 + i; let a = uv.getX(n) * sizes[f][0] / S, b = uv.getY(n) * sizes[f][1] / S;
+      if (horizontal) [a, b] = [b, a];
+      uv.setXY(n, a + ou, b + ov);
+    }
+    return add(p, g, M.wood, x, y, z);
+  }
+
+  function bar(g, len, x, y, horizontal) {
+    const m = add(g, new THREE.CylinderGeometry(0.2, 0.2, len, 10), M.pull, x, y, 1);
+    if (horizontal) m.rotation.z = Math.PI / 2;
+    [-1, 1].forEach((s) => {
+      const post = add(g, new THREE.CylinderGeometry(0.12, 0.12, 0.65, 8), M.pull, x + (horizontal ? s * len * 0.4 : 0), y + (horizontal ? 0 : s * len * 0.4), 0.7);
+      post.rotation.x = Math.PI / 2;
+    });
+  }
+
+  /* One five-piece shaker front. x and y are its lower-left corner and z is its back plane. */
+  function front(p, x, y, w, h, z, pull, pullY) {
+    const g = new THREE.Group(); g.position.set(x + w / 2, y + h / 2, z + 0.375); p.add(g);
+    const W = w - 0.14, H = h - 0.14, r = Math.max(1.1, Math.min(2.4, Math.min(W, H) * 0.2));
+    wd(g, r, H, 0.75, -W / 2 + r / 2, 0, 0);
+    wd(g, r, H, 0.75, W / 2 - r / 2, 0, 0);
+    wd(g, W - 2 * r, r, 0.75, 0, H / 2 - r / 2, 0, true);
+    wd(g, W - 2 * r, r, 0.75, 0, -H / 2 + r / 2, 0, true);
+    wd(g, W - 2 * r, H - 2 * r, 0.3, 0, 0, -0.2);
+    const len = Math.min(W * 0.45, 5);
+    if (pull === 'h') bar(g, len, 0, 0, true);
+    if (pull === 'h2') { bar(g, 5, -W / 4, 0, true); bar(g, 5, W / 4, 0, true); }
+    if (pull === 'top') bar(g, len, 0, H / 2 - r / 2, true);
+    if (pull === 'vr') bar(g, 4.5, W / 2 - r / 2, pullY, false);
+    if (pull === 'vl') bar(g, 4.5, -W / 2 + r / 2, pullY, false);
+  }
+
+  function rows(p, w, z, top, spec) {
+    let y = top;
+    spec.forEach(([h, kind]) => {
+      y -= h;
+      if (kind === 'drawer') front(p, 0, y, w, h, z, 'h');
+      if (kind === 'drawer2') front(p, 0, y, w, h, z, 'h2');
+      if (kind === 'false') front(p, 0, y, w, h, z);
+      if (kind === 'pullout') front(p, 0, y, w, h, z, 'top');
+      if (kind === 'doors') { front(p, 0, y, w / 2, h, z, 'vr', h / 2 - 4.2); front(p, w / 2, y, w / 2, h, z, 'vl', h / 2 - 4.2); }
+      if (kind === 'doorR') front(p, 0, y, w, h, z, 'vr', h / 2 - 4.2);
+    });
+  }
+
+  const THREE_DRAWER = [[7, 'drawer'], [11.5, 'drawer'], [11.5, 'drawer']];
+
+  function baseCab(g, w, spec) {
+    bx(g, w, 4.5, 21, M.toe, w / 2, 2.25, 10.5);
+    bx(g, w - 0.02, 30, 23.25, M.box, w / 2, 19.5, 11.625);
+    rows(g, w, 23.25, 34.5, spec);
+  }
+
+  function blindCorner(g, w) {
+    const blind = 26.7;
+    bx(g, w, 4.5, 21, M.toe, w / 2, 2.25, 10.5);
+    bx(g, w - 0.02, 30, 23.25, M.box, w / 2, 19.5, 11.625);
+    wd(g, blind, 30, 0.75, blind / 2, 19.5, 23.625);
+    const f = new THREE.Group(); f.position.x = blind; g.add(f);
+    rows(f, w - blind, 23.25, 34.5, [[7.5, 'drawer'], [22.5, 'doorR']]);
+  }
+
+  function wallCab(g, w, h, d, doors) {
+    const body = d - 0.75;
+    bx(g, w - 0.02, h, body, M.box, w / 2, h / 2, body / 2);
+    const py = -h / 2 + 3.6;
+    if (doors === 2) { front(g, 0, 0, w / 2, h, body, 'vr', py); front(g, w / 2, 0, w / 2, h, body, 'vl', py); }
+    else front(g, 0, 0, w, h, body, 'vr', py);
+  }
+
+  function dishwasher(g, w) {
+    bx(g, w - 0.1, 34.2, 23.2, M.steel, w / 2, 17.5, 11.6);
+    bx(g, w - 0.14, 29.4, 0.7, M.steel, w / 2, 19.6, 23.5);
+    bx(g, w - 0.14, 3.2, 0.7, M.dark, w / 2, 32.7, 23.5);
+    bx(g, w - 0.14, 4.4, 0.5, M.dark, w / 2, 2.4, 22.6);
+    const h = add(g, new THREE.CylinderGeometry(0.34, 0.34, w - 3.5, 12), M.steel, w / 2, 29.4, 24.5); h.rotation.z = Math.PI / 2;
+  }
+
+  function range(g, w) {
+    bx(g, w - 0.1, 35.3, 26, M.steel, w / 2, 17.65, 13);
+    bx(g, w - 0.1, 0.9, 27.5, M.iron, w / 2, 35.8, 13.75);
+    bx(g, w - 0.14, 3.2, 0.9, M.dark, w / 2, 33.3, 26.45);
+    bx(g, w - 0.14, 20.5, 0.9, M.steel, w / 2, 20.4, 26.45);
+    bx(g, w - 6, 11, 0.2, M.glass, w / 2, 19.5, 26.98);
+    bx(g, w - 0.14, 7.6, 0.9, M.steel, w / 2, 5.6, 26.45);
+    [[29.2, 0.36], [8, 0.3]].forEach(([y, r]) => {
+      const b = add(g, new THREE.CylinderGeometry(r, r, w - 3.5, 12), M.steel, w / 2, y, 27.9); b.rotation.z = Math.PI / 2;
+    });
+    [[8, 8], [22, 8], [8, 20], [22, 20]].forEach(([x, z]) => {
+      add(g, new THREE.CylinderGeometry(2.7, 2.9, 0.42, 26), M.dark, x, 36.45, z);
+      bx(g, 8.4, 0.3, 0.42, M.iron, x, 36.8, z); bx(g, 0.42, 0.3, 8.4, M.iron, x, 36.8, z);
+    });
+  }
+
+  function microwave(g, w, h) {
+    bx(g, w - 0.1, h, 14.6, M.steel, w / 2, h / 2, 7.3);
+    bx(g, w - 8, h - 2.2, 0.5, M.glass, (w - 8) / 2 + 0.7, h / 2, 14.75);
+    bx(g, 5.8, h - 2.2, 0.5, M.dark, w - 3.4, h / 2, 14.75);
+    add(g, new THREE.CylinderGeometry(0.3, 0.3, h - 4, 10), M.steel, w - 7.1, h / 2, 15.4);
+  }
+
+  function fridge(g, w) {
+    const W = 35.75, x0 = (w - W) / 2;
+    bx(g, W, 70.5, 26.5, M.steel, w / 2, 35.25, 13.25);
+    bx(g, W / 2 - 0.1, 43.7, 1.5, M.steel, x0 + W / 4, 48.65, 27.2);
+    bx(g, W / 2 - 0.1, 43.7, 1.5, M.steel, x0 + W * 0.75, 48.65, 27.2);
+    bx(g, W - 0.1, 24.3, 1.5, M.steel, w / 2, 14.2, 27.2);
+    bx(g, W - 0.2, 1.6, 0.6, M.dark, w / 2, 0.85, 26.2);
+    bx(g, 5.2, 7.5, 0.1, M.dark, x0 + W / 4 - 1, 42, 28);
+    [-1, 1].forEach((s) => {
+      add(g, new THREE.CylinderGeometry(0.42, 0.42, 24, 12), M.steel, w / 2 + s * 1.5, 48, 29.4);
+      [38, 58].forEach((y) => { const p = add(g, new THREE.CylinderGeometry(0.2, 0.2, 1.6, 8), M.steel, w / 2 + s * 1.5, y, 28.7); p.rotation.x = Math.PI / 2; });
+    });
+    const b = add(g, new THREE.CylinderGeometry(0.42, 0.42, 26, 12), M.steel, w / 2, 24.4, 29.4); b.rotation.z = Math.PI / 2;
+  }
+
+  function panel(g, w, h, d) { wd(g, w, h, d, w / 2, h / 2, d / 2); }
+
+  /* Cabinet code plates drawn on the fronts. */
+  const plates = new THREE.Group(); scene.add(plates);
+  function plate(g, code, size, cx, cy, z, maxW, cap) {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 216;
+    const x = c.getContext('2d');
+    x.fillStyle = 'rgba(255,255,255,.95)'; x.beginPath();
+    if (x.roundRect) x.roundRect(4, 4, 504, 208, 26); else x.rect(4, 4, 504, 208);
+    x.fill(); x.strokeStyle = '#1f2fa3'; x.lineWidth = 6; x.stroke();
+    let fs = 96; x.font = `600 ${fs}px "IBM Plex Mono", Menlo, monospace`;
+    while (x.measureText(code).width > 470 && fs > 26) { fs -= 3; x.font = `600 ${fs}px "IBM Plex Mono", Menlo, monospace`; }
+    x.fillStyle = '#1f2fa3'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(code, 256, 82);
+    x.font = '500 54px Archivo, Arial, sans-serif'; x.fillStyle = '#23283a'; x.fillText(size, 256, 164);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 8;
+    const pw = Math.min(maxW, cap || 13), ph = (pw * 216) / 512;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false }));
+    m.position.set(cx, cy, z); m.userData.plate = true; g.add(m);
+    return m;
+  }
+
+  function fr(n) {
+    const w = Math.floor(n + 1e-6), f = Math.round((n - w) * 8);
+    const s = ['', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞'][f];
+    return `${w || ''}${s}"`;
+  }
+
+  const items = [];
+  const layers = { upper: new THREE.Group(), appliance: new THREE.Group(), counter: new THREE.Group(), base: new THREE.Group(), bath: new THREE.Group() };
+  Object.values(layers).forEach((l) => scene.add(l));
+
+  const WALLS = {
+    sink: (g, s) => { g.position.set(s, 0, 0); },
+    range: (g, s) => { g.rotation.y = -Math.PI / 2; g.position.set(ROOM.sink, 0, s); },
+    island: (g, s) => { g.rotation.y = Math.PI; g.position.set(ISLAND.x + 60 - s, 0, ISLAND.z + 24); },
+    bath: (g, s) => { g.position.set(s, 0, 0); },
+  };
+
+  function place(run, wall, area, start, def) {
+    const layer = def.layer || 'base';
+    const g = new THREE.Group();
+    WALLS[wall](g, start); layers[layer].add(g);
+    if (def.y) g.position.y = def.y;
+    def.build(g);
+    if (def.plate !== false && def.w >= 9) {
+      const py = def.plateY != null ? def.plateY : def.y ? def.h / 2 : 19;
+      plate(g, def.code, def.size || fr(def.w), def.plateX != null ? def.plateX : def.w / 2, py, def.plateZ || 24.2, Math.min(def.w - 1.4, def.plateW || 13));
+    }
+    const item = { ...def, wall, area, start, group: g, id: items.length };
+    g.userData.item = item; items.push(item);
+    return item;
+  }
+
+  function run(wall, area, start, list) {
+    let s = start;
+    list.forEach((d) => { if (d.gap) { s += d.gap; return; } place(run, wall, area, s, d); if (!d.stack) s += d.w; });
+    return s;
+  }
+
+  const baseFacts = { h: 34.5, d: 24 };
+  const sinkEnd = run('sink', 'Sink wall', 2.5, [
+    { code: 'BSKIN', name: 'End panel, left side of sink run', w: 0.25, ...baseFacts, build: (g) => panel(g, 0.25, 34.5, 24) },
+    { code: 'DB21', name: '3-drawer base', w: 21, ...baseFacts, count: 1, build: (g) => baseCab(g, 21, THREE_DRAWER) },
+    { code: 'CDT845P2NS1', name: 'Dishwasher', w: 23.75, layer: 'appliance', appliance: 1, build: (g) => dishwasher(g, 23.75) },
+    { code: 'SB36FB', name: 'Sink base, false drawer front and 2 doors', w: 36, ...baseFacts, count: 1, build: (g) => baseCab(g, 36, [[7.5, 'false'], [22.5, 'doors']]) },
+    { code: 'B18TR-DMK', name: 'Trash pull-out base with top drawer', note: 'Retail listings for the JSI B18TR show 1 door, 1 drawer, and two 35-quart bins. Check that the bins and hardware are in the box.', w: 18, ...baseFacts, count: 1, build: (g) => baseCab(g, 18, [[7.5, 'drawer'], [22.5, 'pullout']]) },
+    { code: 'WF330', name: 'Filler at the inside corner', note: 'There are two WF330 on the job. This one is at the kitchen corner. The other is at the basement vanity.', w: 3, h: 30, build: (g) => { bx(g, 3, 4.5, 21, M.toe, 1.5, 2.25, 10.5); wd(g, 3, 30, 0.75, 1.5, 19.5, 23.625); bx(g, 2.9, 30, 23, M.box, 1.5, 19.5, 11.5); } },
+  ]);
+
+  const lowerEnd = run('range', 'Range wall, base', 0, [
+    { code: 'BBC42/45-PO-L', name: 'Blind corner base, door hinged left', note: 'Shows on both the sink wall and range wall drawings. It is one cabinet. Part of it hides behind the sink run.', w: 44.5, size: '42" to 45"', ...baseFacts, count: 1, plateX: 35.6, plateW: 15.5, build: (g) => blindCorner(g, 44.5) },
+    { code: 'BF09PO', name: '9" base with full-height door and pull-out', w: 9, ...baseFacts, count: 1, plateW: 8, build: (g) => baseCab(g, 9, [[30, 'pullout']]) },
+    { code: 'C2S900P2MS1', name: 'Range', w: 29.875, h: 36.25, layer: 'appliance', appliance: 1, plateY: 19.5, plateZ: 27.2, build: (g) => range(g, 29.875) },
+    { code: 'DB24', name: '3-drawer base', w: 24, ...baseFacts, count: 1, build: (g) => baseCab(g, 24, THREE_DRAWER) },
+    { code: 'PQTR', name: 'Quarter-inch skin, fridge side', w: 0.25, h: 90, build: (g) => panel(g, 0.25, 90, 24) },
+    { code: 'REF96', name: 'Fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
+    { code: 'GYE22GYNFS', name: 'Refrigerator', w: 36, size: '36" opening', h: 70.5, layer: 'appliance', appliance: 1, plateY: 50, plateZ: 28.1, plateX: 9.5, plateW: 15, build: (g) => fridge(g, 36) },
+    { code: 'REF96', name: 'Fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
+    { code: 'PQTR', name: 'Quarter-inch skin, fridge side', w: 0.25, h: 90, build: (g) => panel(g, 0.25, 90, 24) },
+  ]);
+
+  const wallFacts = (h, d = 12) => ({ h, d, y: 54 + (36 - h), layer: 'upper', plateZ: d + 0.2 });
+  const upperEnd = run('range', 'Range wall, upper', 0, [
+    { code: 'WF642', name: 'Corner filler', note: 'Shows on both the sink wall and range wall drawings. It is one piece: a 6" by 42" filler, cut to 5⅜" by 36".', w: 5.375, ...wallFacts(36), build: (g) => { wd(g, 5.375, 36, 0.75, 2.69, 18, 11.625); bx(g, 5.3, 36, 11, M.box, 2.69, 18, 5.5); } },
+    { code: 'W3636B', name: 'Wall cabinet, 2 doors', note: 'Shows on both the sink wall and range wall drawings. It is one cabinet.', w: 36, ...wallFacts(36), count: 1, build: (g) => wallCab(g, 36, 36, 12, 2) },
+    { code: 'W1236L', name: 'Wall cabinet, 1 door hinged left', w: 12, ...wallFacts(36), count: 1, plateW: 10.5, build: (g) => wallCab(g, 12, 36, 12, 1) },
+    { code: 'W3018B', name: 'Wall cabinet over microwave', w: 30, ...wallFacts(18), count: 1, build: (g) => wallCab(g, 30, 18, 12, 2) },
+    { code: 'W2436B', name: 'Wall cabinet, 2 doors', w: 24, ...wallFacts(36), count: 1, build: (g) => wallCab(g, 24, 36, 12, 2) },
+    { gap: 1.75 },
+    { code: 'W361824B', name: 'Deep cabinet over fridge', w: 36, ...wallFacts(18, 24), count: 1, build: (g) => wallCab(g, 36, 18, 24, 2) },
+  ]);
+
+  place(run, 'range', 'Range wall, upper', 53.375, {
+    code: 'CVM517P2MS1', name: 'Over-the-range microwave', w: 30, h: 15.5, d: 15.4, y: 56.5, layer: 'appliance', appliance: 1,
+    plateX: 11, plateY: 7.75, plateZ: 15.1, plateW: 15, build: (g) => microwave(g, 30, 15.5),
+  });
+
+  function trimItem(group, def) {
+    const item = { ...def, group, id: items.length };
+    group.userData.item = item; items.push(item);
+    return item;
+  }
+  const crownNote = 'Drawn with a joint at 96". The full run with returns is about 186", so 2 lengths leave little for cuts. The order paperwork does not list how many lengths shipped.';
+  const crown1 = new THREE.Group(); layers.upper.add(crown1);
+  bx(crown1, 15.3, 4, 96, M.wood, ROOM.sink - 7.65, 92, 48);
+  trimItem(crown1, { code: 'CCM8-4', name: 'Crown molding, length 1 from the corner', note: crownNote, w: 96, h: 4, wall: 'range', area: 'Range wall, upper', start: 146.9 });
+  const crown2 = new THREE.Group(); layers.upper.add(crown2);
+  bx(crown2, 15.3, 4, 11.375, M.wood, ROOM.sink - 7.65, 92, 101.69);
+  bx(crown2, 27.2, 4, 39.5, M.wood, ROOM.sink - 13.6, 92, 127.125);
+  trimItem(crown2, { code: 'CCM8-4', name: 'Crown molding, length 2 over the fridge', note: crownNote, w: 96, h: 4, wall: 'range', area: 'Range wall, upper', start: 147 });
+
+  const islandEnd = run('island', 'Island', 0, [
+    { code: 'DB15', name: '3-drawer base', w: 15, ...baseFacts, count: 1, plateW: 12.5, build: (g) => baseCab(g, 15, THREE_DRAWER) },
+    { code: 'B30BSCRT', name: 'Base with wide drawer and 2 doors', w: 30, ...baseFacts, count: 1, build: (g) => baseCab(g, 30, [[7.5, 'drawer2'], [22.5, 'doors']]) },
+    { code: 'DB15', name: '3-drawer base', w: 15, ...baseFacts, count: 1, plateW: 12.5, build: (g) => baseCab(g, 15, THREE_DRAWER) },
+  ]);
+
+  [[ISLAND.x - 0.125, 'BSKIN', 'Island end panel, sink-side view right', 60.1], [ISLAND.x + 60.125, 'BSKIN', 'Island end panel, sink-side view left', 60.2]].forEach(([x, code, name, start]) => {
+    const g = new THREE.Group(); layers.base.add(g);
+    wd(g, 0.25, 34.5, 24, x, 17.25, ISLAND.z + 12);
+    trimItem(g, { code, name, w: 0.25, h: 34.5, d: 24, wall: 'island', area: 'Island', start });
+  });
+  const islandBack = new THREE.Group(); layers.base.add(islandBack);
+  wd(islandBack, 60.5, 34.5, 0.25, ISLAND.x + 30, 17.25, ISLAND.z + 24.125, true);
+  trimItem(islandBack, { code: 'PHLF', name: 'Island back panel', note: 'Covers the back of all three island cabinets. The back was still raw in the Nov 20 job photo.', w: 60.5, h: 34.5, wall: 'island', area: 'Island', start: 60.3 });
+
+  /* Bathroom vanities, shown on their own */
+  const bathWalls = [[0, 74], [90, 38], [144, 30]];
+  bathWalls.forEach(([x, w]) => {
+    bx(layers.bath, w, 96, 4, M.wall, x + w / 2, 48, -2);
+    const f = bx(layers.bath, w, 1, 44, M.floor, x + w / 2, -0.5, 22); f.castShadow = false;
+  });
+  const bdec = (name) => ({ code: 'BDEC', name, w: 0.75, ...baseFacts, layer: 'bath', build: (g) => panel(g, 0.75, 34.5, 24) });
+  const vanity = (code, name, w, spec) => ({ code, name, w, ...baseFacts, count: 1, layer: 'bath', plateW: 11, build: (g) => baseCab(g, w, spec) });
+  const SINK_FRONT = [[7.5, 'false'], [22.5, 'doors']];
+  run('bath', 'Primary bath', 6.25, [
+    bdec('Decorative end panel, left'),
+    vanity('SB24FB', 'Sink base, left', 24, SINK_FRONT),
+    vanity('DB12', '3-drawer base, center', 12, THREE_DRAWER),
+    vanity('SB24FB', 'Sink base, right', 24, SINK_FRONT),
+    bdec('Decorative end panel, right'),
+  ]);
+  run('bath', 'Guest bath', 91.75, [
+    bdec('Decorative end panel, left'),
+    vanity('SB33FB', 'Sink base', 33, SINK_FRONT),
+    bdec('Decorative end panel, right'),
+  ]);
+  run('bath', 'Basement bath', 146, [
+    vanity('SB27FB', 'Sink base', 27, SINK_FRONT),
+    { code: 'WF330', name: 'Filler to the wall, 1" showing', note: 'There are two WF330 on the job. This one is at the basement vanity. The other is at the kitchen corner.', w: 1, size: '3" ripped to 1"', h: 30, layer: 'bath', build: (g) => { bx(g, 1, 4.5, 21, M.toe, 0.5, 2.25, 10.5); wd(g, 1, 30, 0.75, 0.5, 19.5, 23.625); } },
+  ]);
+
+  /* Room shell */
+  const shell = new THREE.Group(); scene.add(shell);
+  const floor = bx(shell, ROOM.sink + 44, 1, ROOM.range + 54, M.floor, (ROOM.sink - 44) / 2, -0.5, (ROOM.range + 54) / 2);
+  floor.castShadow = false;
+  const win = { x0: 42.25, x1: 90.25, y0: 40, y1: 84 };
+  const sinkWall = new THREE.Group(); shell.add(sinkWall);
+  const T = 4, H = ROOM.ceil;
+  bx(sinkWall, win.x0, H, T, M.wall, win.x0 / 2, H / 2, -T / 2);
+  bx(sinkWall, ROOM.sink - win.x1, H, T, M.wall, (ROOM.sink + win.x1) / 2, H / 2, -T / 2);
+  bx(sinkWall, win.x1 - win.x0, win.y0, T, M.wall, (win.x0 + win.x1) / 2, win.y0 / 2, -T / 2);
+  bx(sinkWall, win.x1 - win.x0, H - win.y1, T, M.wall, (win.x0 + win.x1) / 2, (H + win.y1) / 2, -T / 2);
+  const ww = win.x1 - win.x0, wh = win.y1 - win.y0, wx = (win.x0 + win.x1) / 2, wy = (win.y0 + win.y1) / 2;
+  add(sinkWall, new THREE.PlaneGeometry(ww, wh), M.sky, wx, wy, -3.2).castShadow = false;
+  [[ww + 3, 1.6, wx, win.y1 + 0.2], [ww + 3, 1.6, wx, win.y0 - 0.2]].forEach(([w, h, x, y]) => bx(sinkWall, w, h, 1, M.frame, x, y, 0.1));
+  [[1.6, wh + 2, win.x0 - 0.2], [1.6, wh + 2, win.x1 + 0.2], [1.5, wh, wx]].forEach(([w, h, x]) => bx(sinkWall, w, h, 1, M.frame, x, wy, 0.1));
+  const rangeWall = bx(shell, T, H, ROOM.range + T, M.wall, ROOM.sink + T / 2, H / 2, (ROOM.range - T) / 2);
+
+  /* Placeholder countertops and sink */
+  const c = layers.counter, cy = 35.25;
+  bx(c, ROOM.sink, 1.5, 25.5, M.stone, ROOM.sink / 2, cy, 12.75);
+  bx(c, 25.5, 1.5, 53.5 - 25.5, M.stone, ROOM.sink - 12.75, cy, (53.5 + 25.5) / 2);
+  bx(c, 25.5, 1.5, 107.375 - 83.375, M.stone, ROOM.sink - 12.75, cy, (83.375 + 107.375) / 2);
+  bx(c, 63, 1.5, 27.25, M.stone, ISLAND.x + 30, cy, ISLAND.z + 12.1);
+  bx(c, 28, 0.1, 15.5, M.steel, 65.5, 36.03, 12.6);
+  bx(c, 25, 0.12, 12.8, M.dark, 65.5, 36.05, 12.6);
+  const faucet = add(c, new THREE.CylinderGeometry(0.55, 0.65, 13, 14), M.steel, 65.5, 42.5, 3.2);
+  const spout = add(c, new THREE.CylinderGeometry(0.42, 0.42, 7.5, 12), M.steel, 65.5, 48.6, 6.6); spout.rotation.x = Math.PI / 2;
+
+  /* Measurement lines */
+  const dims = new THREE.Group(); scene.add(dims);
+  const dimMat = new THREE.LineBasicMaterial({ color: 0x1f2fa3, depthTest: false, transparent: true });
+  const sprites = [];
+  function textSprite(text) {
+    const c = document.createElement('canvas'), x = c.getContext('2d'), font = '600 50px "IBM Plex Mono", Menlo, monospace';
+    x.font = font; const w = Math.ceil(x.measureText(text).width) + 40; c.width = w; c.height = 82;
+    x.font = font; x.fillStyle = '#1f2fa3';
+    if (x.roundRect) { x.beginPath(); x.roundRect(0, 0, w, 82, 12); x.fill(); } else x.fillRect(0, 0, w, 82);
+    x.fillStyle = '#ffffff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(text, w / 2, 44);
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, toneMapped: false, sizeAttenuation: false }));
+    s.userData.base = [(0.021 * w) / 82, 0.021];
+    s.scale.set(s.userData.base[0], s.userData.base[1], 1); s.renderOrder = 20; sprites.push(s);
+    return s;
+  }
+  function dim(a, b, text, tick, views, labelOffset) {
+    const G = new THREE.Group(); G.userData.views = views; dims.add(G);
+    const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), t = new THREE.Vector3(...tick).multiplyScalar(2.2);
+    const pts = [A, B, A.clone().add(t), A.clone().sub(t), B.clone().add(t), B.clone().sub(t)];
+    const g = new THREE.BufferGeometry().setFromPoints(pts);
+    const l = new THREE.LineSegments(g, dimMat); l.renderOrder = 19; G.add(l);
+    const s = textSprite(text); s.position.copy(A).add(B).multiplyScalar(0.5);
+    if (labelOffset) s.position.add(new THREE.Vector3(...labelOffset));
+    G.add(s);
+  }
+  const V = { all: 'Whole kitchen', sink: 'Sink wall', range: 'Range wall', island: 'Island', top: 'From above' };
+  dim([0, 98, 0], [ROOM.sink, 98, 0], '128½"', [0, 1, 0], [V.all, V.sink, V.top]);
+  dim([ROOM.sink, 98, 0], [ROOM.sink, 98, ROOM.range], '152"', [0, 1, 0], [V.all, V.range, V.top]);
+  dim([1, 0, 0.5], [1, 94, 0.5], '94" ceiling', [1, 0, 0], [V.all, V.sink], [20, 24, 0]);
+  dim([ISLAND.x, 36.2, ISLAND.z + 29], [ISLAND.x + 60, 36.2, ISLAND.z + 29], '60" island', [0, 0, 1], [V.all, V.island, V.top]);
+  dim([36, 0.4, 24], [36, 0.4, ISLAND.z], 'about 39"', [1, 0, 0], [V.all, V.top]);
+  dim([ISLAND.x + 60.25, 0.4, 75], [104.5, 0.4, 75], 'about 38½"', [0, 0, 1], [V.all, V.top]);
+  function showDims(name) { dims.children.forEach((g) => { g.visible = g.userData.views.includes(name); }); }
+  const bathLabels = new THREE.Group(); bathLabels.visible = false; scene.add(bathLabels);
+  [['Primary bath, 74" wall', 37], ['Guest, 38"', 109], ['Basement, 30"', 159]].forEach(([t, x]) => {
+    const s = textSprite(t); s.position.set(x, 70, 1); bathLabels.add(s);
+  });
+  function applyFov(f) {
+    camera.fov = f; camera.updateProjectionMatrix();
+    const k = Math.tan(THREE.MathUtils.degToRad(f / 2)) / Math.tan(THREE.MathUtils.degToRad(18));
+    sprites.forEach((s) => s.scale.set(s.userData.base[0] * k, s.userData.base[1] * k, 1));
+  }
+
+  /* Selection */
+  const selMat = new THREE.MeshBasicMaterial({ color: 0x3f54ff, transparent: true, opacity: 0.2, depthWrite: false });
+  const sel = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), selMat); sel.visible = false; sel.renderOrder = 10; scene.add(sel);
+  const edge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.LineBasicMaterial({ color: 0x1f2fa3 }));
+  edge.visible = false; edge.renderOrder = 11; scene.add(edge);
+  const hov = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.LineBasicMaterial({ color: 0x6d7cff }));
+  hov.visible = false; scene.add(hov);
+
+  function boxOf(item) {
+    const hidden = [];
+    item.group.traverse((o) => { if (o.userData.plate) { hidden.push(o); o.visible = false; } });
+    const b = new THREE.Box3();
+    item.group.updateWorldMatrix(true, true);
+    item.group.traverse((o) => { if (o.isMesh && !o.userData.plate) { o.geometry.computeBoundingBox(); const bb = o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld); b.union(bb); } });
+    hidden.forEach((o) => { o.visible = true; });
+    return b;
+  }
+  function fit(obj, b, grow) {
+    const s = b.getSize(new THREE.Vector3()), p = b.getCenter(new THREE.Vector3());
+    obj.position.copy(p); obj.scale.set(s.x + grow, s.y + grow, s.z + grow);
+  }
+
+  let selected = null;
+  const card = document.getElementById('card');
+  const counts = { cabinets: items.filter((i) => i.count).length, appliances: items.filter((i) => i.appliance).length };
+  const checkable = items.filter((i) => !i.appliance);
+  let marks = {}, extras = [], filter = 'All';
+  const STORE = 'lee-kitchen-check-v1';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const cleanCode = (s) => String(s).toUpperCase().replace(/[^A-Z0-9/.\- ]/g, '').trim().slice(0, 24);
+
+  function encodeState() {
+    return 'c=' + checkable.map((i) => marks[i.id] || 0).join('') + (extras.length ? '~' + extras.map(encodeURIComponent).join(',') : '');
+  }
+  function decodeState(str) {
+    const m = /^c=([012]+)(?:~(.*))?$/.exec(str || '');
+    if (!m || m[1].length !== checkable.length) return false;
+    marks = {};
+    checkable.forEach((it, n) => { const v = +m[1][n]; if (v) marks[it.id] = v; });
+    extras = (m[2] || '').split(',').filter(Boolean).slice(0, 40).map((x) => { try { return cleanCode(decodeURIComponent(x)); } catch (e) { return ''; } }).filter(Boolean);
+    return true;
+  }
+  function saveState() {
+    const s = encodeState();
+    try { localStorage.setItem(STORE, s); } catch (e) { /* storage can be blocked */ }
+    if (window.top !== window) return;
+    try { history.replaceState(null, '', '#' + s); } catch (e) { /* some frames block this */ }
+  }
+  if (window.top !== window) $('copyLink').hidden = true;
+  function loadState() {
+    if (decodeState(location.hash.slice(1))) return;
+    try { decodeState(localStorage.getItem(STORE)); } catch (e) { /* storage can be blocked */ }
+  }
+
+  function paint(i) {
+    if (i.appliance) return;
+    if (!i.ov) {
+      const b = boxOf(i);
+      const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)), new THREE.LineBasicMaterial());
+      m.raycast = () => {}; e.raycast = () => {}; m.renderOrder = 8; e.renderOrder = 9;
+      fit(m, b, 0.35); fit(e, b, 0.35); i.group.parent.add(m, e); i.ov = { m, e };
+    }
+    const st = marks[i.id] || 0;
+    i.ov.m.visible = i.ov.e.visible = st > 0;
+    if (st) {
+      const c = st === 2 ? 0xe02020 : 0x1f9d55;
+      i.ov.m.material.color.setHex(c); i.ov.m.material.opacity = st === 2 ? 0.58 : 0.16; i.ov.e.material.color.setHex(c);
+    }
+  }
+
+  function extraInfo(code) {
+    const plan = checkable.filter((i) => i.code === code);
+    if (!plan.length) return 'Not on any drawing. Check the box label and ask the supplier what it is.';
+    const places = [...new Set(plan.map((i) => i.area))].join(', ');
+    const open = plan.filter((i) => marks[i.id] !== 1).length;
+    return open ? `On the drawings: ${plan.length} at ${places}. ${open} not marked Here yet, so this is probably that piece.` : `On the drawings: ${plan.length} at ${places}, all marked Here. This one is a true extra.`;
+  }
+
+  function renderTotals() {
+    const here = checkable.filter((i) => marks[i.id] === 1).length, miss = checkable.filter((i) => marks[i.id] === 2).length;
+    $('totals').innerHTML = `<div><b>${checkable.length - here - miss}</b><span>to check</span></div><div><b class="good">${here}</b><span>here</span></div><div><b class="bad">${miss}</b><span>missing</span></div><div><b>${extras.length}</b><span>extra</span></div>`;
+  }
+  function renderExtras() {
+    $('extras').innerHTML = extras.map((c, n) => `<div class="extra"><b>${esc(c)}</b><p>${esc(extraInfo(c))}</p><button type="button" class="mark" data-x="${n}" aria-label="Remove ${esc(c)}">Remove</button></div>`).join('');
+  }
+  function applyFilter() {
+    document.querySelectorAll('.item').forEach((el) => {
+      const i = items[+el.dataset.id], v = marks[i.id] || 0;
+      el.hidden = filter !== 'All' && (i.appliance || (filter === 'To check' && v !== 0) || (filter === 'Here' && v !== 1) || (filter === 'Missing' && v !== 2));
+    });
+    document.querySelectorAll('.group').forEach((g) => {
+      let n = g.nextElementSibling, any = false;
+      while (n && n.classList.contains('item')) { if (!n.hidden) any = true; n = n.nextElementSibling; }
+      g.hidden = !any;
+    });
+  }
+  function renderMarks() {
+    document.querySelectorAll('#list .mark').forEach((b) => b.setAttribute('aria-pressed', String((marks[+b.dataset.id] || 0) === +b.dataset.v)));
+    renderTotals(); renderExtras(); applyFilter(); checkable.forEach(paint); renderCard(); dirty = true;
+  }
+  function setMark(id, v) {
+    if (marks[id] === v) delete marks[id]; else marks[id] = v;
+    saveState(); renderMarks();
+  }
+  document.addEventListener('click', (e) => {
+    const m = e.target.closest('.mark');
+    if (!m) return;
+    if (m.dataset.x != null) { extras.splice(+m.dataset.x, 1); saveState(); renderMarks(); return; }
+    setMark(+m.dataset.id, +m.dataset.v);
+  });
+
+  function listText() {
+    const line = (i) => `${i.code} (${i.size || fr(i.w)}), ${i.area}: ${i.name}`;
+    const miss = checkable.filter((i) => marks[i.id] === 2), here = checkable.filter((i) => marks[i.id] === 1).length;
+    return ['Lee St cabinet check', '', `MISSING (${miss.length})`, ...(miss.length ? miss.map(line) : ['None marked']), '', `EXTRA (${extras.length})`, ...(extras.length ? extras.map((c) => `${c}: ${extraInfo(c)}`) : ['None marked']), '', `${here} of ${checkable.length} pieces marked Here. ${checkable.length - here - miss.length} not checked.`].join('\n');
+  }
+  function copy(text, done) {
+    const fallback = () => { const o = $('out'); o.hidden = false; o.value = text; o.focus(); o.select(); $('msg').textContent = 'Copy the text below.'; };
+    $('out').hidden = true;
+    if (!navigator.clipboard) return fallback();
+    navigator.clipboard.writeText(text).then(() => { $('msg').textContent = done; }, fallback);
+  }
+  $('copyList').addEventListener('click', () => copy(listText(), 'Missing list copied.'));
+  $('copyLink').addEventListener('click', () => copy(location.origin + location.pathname + '#' + encodeState(), 'Link copied. Whoever opens it sees your marks.'));
+  $('codes').innerHTML = [...new Set(checkable.map((i) => i.code))].sort().map((c) => `<option value="${c}"></option>`).join('');
+  $('extraForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const c = cleanCode($('extraCode').value);
+    if (!c) { $('extraMsg').textContent = 'Type the code printed on the box.'; return; }
+    if (extras.length >= 40) { $('extraMsg').textContent = 'The list is full at 40 extra pieces.'; return; }
+    extras.push(c); $('extraCode').value = ''; $('extraMsg').textContent = '';
+    saveState(); renderMarks();
+  });
+  ['All', 'To check', 'Missing', 'Here'].forEach((f) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = f;
+    b.setAttribute('aria-pressed', String(f === filter));
+    b.addEventListener('click', () => {
+      filter = f;
+      document.querySelectorAll('.chip').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      applyFilter();
+    });
+    $('filters').appendChild(b);
+  });
+
+  const markButtons = (i) => {
+    const v = marks[i.id] || 0;
+    return `<span class="marks"><button type="button" class="mark here" data-id="${i.id}" data-v="1" aria-pressed="${v === 1}" aria-label="${i.code} is here">Here</button><button type="button" class="mark miss" data-id="${i.id}" data-v="2" aria-pressed="${v === 2}" aria-label="${i.code} is missing">Missing</button></span>`;
+  };
+
+  function renderCard() {
+    if (!selected) {
+      card.innerHTML = `<h2>How to use this</h2>
+        <p style="margin:0">The drawings call for <b>${checkable.length} pieces</b>: ${counts.cabinets} cabinets and ${checkable.length - counts.cabinets} fillers, panels, and trim. Tap a piece to see where it goes, then mark it Here or Missing. Missing pieces turn red in the model.</p>`;
+      return;
+    }
+    const i = selected, facts = [['Width', i.size || fr(i.w)]];
+    if (i.h) facts.push(['Height', fr(i.h)]);
+    if (i.d) facts.push(['Depth', fr(i.d)]);
+    card.innerHTML = `<h2>${i.area}</h2><div class="code">${i.code}</div><div class="name">${i.name}</div>
+      <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+      ${i.note ? `<p class="note">${i.note}</p>` : ''}
+      ${i.appliance ? '<p class="small">Appliance. Not part of the cabinet order.</p>' : `<div class="actions">${markButtons(i)}</div>`}`;
+  }
+
+  function select(item, fly) {
+    selected = item;
+    document.querySelectorAll('.row').forEach((r) => r.setAttribute('aria-current', item && +r.dataset.id === item.id ? 'true' : 'false'));
+    if (item) {
+      const b = boxOf(item);
+      fit(sel, b, 0.5); fit(edge, b, 0.5); sel.visible = edge.visible = true;
+      if (fly) flyToItem(item, b);
+    } else sel.visible = edge.visible = false;
+    renderCard(); dirty = true;
+  }
+
+  /* Flat labels for the view from above */
+  const topLabels = new THREE.Group(); topLabels.visible = false; scene.add(topLabels);
+  items.filter((i) => (i.count || i.appliance) && !i.y && i.wall !== 'bath').forEach((i) => {
+    const b = boxOf(i), ctr = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3());
+    const maxW = i.wall === 'range' ? Math.min(19, (s.z - 1) / 0.42) : Math.min(19, s.x - 1.2);
+    const m = plate(topLabels, i.code, i.size || fr(i.w), ctr.x, b.max.y + 0.2, ctr.z, maxW, 19);
+    m.rotation.x = -Math.PI / 2;
+  });
+  let topMode = false, savedLayers = null;
+  function setToggle(k, v) { if (inputs[k].checked !== v) { inputs[k].checked = v; inputs[k].dispatchEvent(new Event('change')); } }
+  function setTop(on) {
+    if (on === topMode) return;
+    topMode = on;
+    if (on) { savedLayers = { upper: inputs.upper.checked, counter: inputs.counter.checked }; setToggle('upper', false); setToggle('counter', false); }
+    else if (savedLayers) { setToggle('upper', savedLayers.upper); setToggle('counter', savedLayers.counter); }
+    items.find((i) => i.code === 'CVM517P2MS1').group.visible = !on;
+    syncLayers();
+  }
+  let bathMode = false;
+  function setBath(on) { bathMode = on; syncLayers(); }
+  function syncLayers() {
+    layers.base.visible = !bathMode;
+    layers.upper.visible = !bathMode && inputs.upper.checked;
+    layers.appliance.visible = !bathMode && inputs.appliance.checked;
+    layers.counter.visible = !bathMode && inputs.counter.checked;
+    dims.visible = !bathMode && inputs.dims.checked;
+    shell.visible = !bathMode;
+    layers.bath.visible = bathMode;
+    bathLabels.visible = bathMode;
+    setPlates(inputs.labels.checked);
+    topLabels.visible = topMode && !bathMode && inputs.labels.checked;
+    dirty = true;
+  }
+
+  /* Cabinet list */
+  const list = document.getElementById('list');
+  ['Sink wall', 'Range wall, base', 'Range wall, upper', 'Island', 'Primary bath', 'Guest bath', 'Basement bath'].forEach((a) => {
+    const t = document.createElement('div'); t.className = 'group'; t.textContent = a; list.appendChild(t);
+    items.filter((i) => i.area === a).sort((p, q) => p.start - q.start).forEach((i) => {
+      const w = document.createElement('div'); w.className = 'item'; w.dataset.id = i.id;
+      const r = document.createElement('button'); r.type = 'button'; r.className = 'row'; r.dataset.id = i.id;
+      r.innerHTML = `<span class="c">${i.code}</span><span class="d">${i.size || fr(i.w)}</span><span class="n">${i.name}</span>`;
+      r.addEventListener('click', () => { setTop(false); setBath(i.wall === 'bath'); ensureVisible(i); setView(null); select(i, true); });
+      w.appendChild(r);
+      w.insertAdjacentHTML('beforeend', i.appliance ? '<span class="tag">Appliance</span>' : markButtons(i));
+      list.appendChild(w);
+    });
+  });
+
+  /* Layer toggles */
+  const TOGGLES = [['upper', 'Wall cabinets'], ['appliance', 'Appliances'], ['counter', 'Countertops'], ['dims', 'Measurements'], ['labels', 'Cabinet labels']];
+  const togglesEl = document.getElementById('toggles');
+  const inputs = {};
+  function setPlates(v) { scene.traverse((o) => { if (o.userData.plate) o.visible = v; }); }
+  TOGGLES.forEach(([k, label]) => {
+    const l = document.createElement('label'), inp = document.createElement('input');
+    inp.type = 'checkbox'; inp.checked = true; inp.id = 'show-' + k; inputs[k] = inp;
+    inp.addEventListener('change', () => {
+      syncLayers();
+      if (selected && !isShown(selected)) select(null);
+      dirty = true;
+    });
+    l.append(inp, label); togglesEl.appendChild(l);
+  });
+  function isShown(i) { for (let o = i.group; o; o = o.parent) if (!o.visible) return false; return true; }
+  function ensureVisible(i) {
+    const k = i.layer || (i.group.parent === layers.upper ? 'upper' : null);
+    if (k && inputs[k] && !inputs[k].checked) { inputs[k].checked = true; inputs[k].dispatchEvent(new Event('change')); }
+  }
+
+  /* Camera */
+  const VIEWS = {
+    'Whole kitchen': { dir: [-130, 96, 166], t: [62, 36, 74], w: 196, h: 136 },
+    'Sink wall': { dir: [0, 86, 128], t: [64, 40, 14], w: 142, h: 112 },
+    'Range wall': { dir: [-126, 86, 0], t: [116, 44, 76], w: 170, h: 112 },
+    'Island': { dir: [0, 65, -71], t: [36, 18, 75], w: 76, h: 56 },
+    'From above': { dir: [0, 1, 0.0006], t: [64, 0, 76], w: 168, h: 182 },
+    'Bathrooms': { dir: [0, 34, 150], t: [87, 38, 0], w: 186, h: 104 },
+  };
+  const viewsEl = document.getElementById('views');
+  const viewBtns = {};
+  Object.keys(VIEWS).forEach((name) => {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = name; viewBtns[name] = b;
+    b.addEventListener('click', () => { select(null); setView(name); });
+    viewsEl.appendChild(b);
+  });
+  function setView(name, instant) {
+    Object.entries(viewBtns).forEach(([n, b]) => b.setAttribute('aria-pressed', n === name ? 'true' : 'false'));
+    if (!name) return;
+    setTop(name === 'From above');
+    setBath(name === 'Bathrooms');
+    showDims(name);
+    const fov = name === 'From above' ? 14 : 36;
+    const v = VIEWS[name], tan = Math.tan(THREE.MathUtils.degToRad(fov / 2));
+    const dist = 1.14 * Math.max(v.h / 2 / tan, v.w / 2 / (tan * camera.aspect));
+    const t = new THREE.Vector3(...v.t);
+    const p = new THREE.Vector3(...v.dir).normalize().multiplyScalar(dist).add(t);
+    flyTo(p, t, instant, fov);
+  }
+
+  let tween = null;
+  function flyTo(p, t, instant, fov = 36) {
+    if (instant || reduceMotion) { applyFov(fov); camera.position.copy(p); controls.target.copy(t); controls.update(); tween = null; dirty = true; return; }
+    tween = { p0: camera.position.clone(), t0: controls.target.clone(), f0: camera.fov, f: fov, p, t, s: performance.now(), d: 720 };
+  }
+  function flyToItem(item, b) {
+    const ctr = b.getCenter(new THREE.Vector3()), s = b.getSize(new THREE.Vector3());
+    const n = item.wall === 'sink' || item.wall === 'bath' ? [0, 0, 1] : item.wall === 'range' ? [-1, 0, 0] : [0, 0, -1];
+    const span = Math.max(item.w, s.y);
+    const d = Math.max(50, span * 2.1 + 12) * Math.max(1, 1.25 / camera.aspect);
+    const low = ctr.y < 45;
+    const p = ctr.clone().add(new THREE.Vector3(n[0] * d, d * (low ? 0.72 : 0.12), n[2] * d));
+    flyTo(p, ctr);
+  }
+
+  /* Picking */
+  const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+  function pick(e) {
+    const r = canvas.getBoundingClientRect();
+    ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const hits = ray.intersectObjects(Object.values(layers), true);
+    for (const h of hits) {
+      let shown = true; for (let o = h.object; o; o = o.parent) if (!o.visible) { shown = false; break; }
+      if (!shown) continue;
+      for (let o = h.object; o; o = o.parent) if (o.userData.item) return o.userData.item;
+      return null;
+    }
+    return null;
+  }
+  let down = null, hovered = null;
+  canvas.addEventListener('pointerdown', (e) => {
+    down = { x: e.clientX, y: e.clientY };
+    if (tween) { applyFov(tween.f); tween = null; }
+    setView(null);
+  });
+  canvas.addEventListener('pointerup', (e) => {
+    if (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 5) select(pick(e), false);
+    down = null;
+  });
+  canvas.addEventListener('pointermove', (e) => {
+    if (e.buttons || e.pointerType === 'touch') return;
+    const it = pick(e);
+    if (it !== hovered) {
+      hovered = it; canvas.style.cursor = it ? 'pointer' : '';
+      if (it && it !== selected) { fit(hov, boxOf(it), 0.4); hov.visible = true; } else hov.visible = false;
+      dirty = true;
+    }
+  });
+  canvas.addEventListener('pointerleave', () => { hovered = null; hov.visible = false; dirty = true; });
+
+  /* Stage color follows the page theme */
+  function applyTheme() {
+    scene.background = new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--stage').trim() || '#dfe2e9');
+    dirty = true;
+  }
+  new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+  let dirty = true;
+  controls.addEventListener('change', () => { dirty = true; });
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); dirty = true;
+  }
+  new ResizeObserver(resize).observe(stage);
+
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (tween) {
+      const u = Math.min(1, (now - tween.s) / tween.d), e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+      camera.position.lerpVectors(tween.p0, tween.p, e);
+      controls.target.lerpVectors(tween.t0, tween.t, e);
+      applyFov(tween.f0 + (tween.f - tween.f0) * e);
+      if (u >= 1) tween = null;
+      dirty = true;
+    }
+    controls.update();
+    sinkWall.visible = camera.position.z > -3;
+    rangeWall.visible = camera.position.x < ROOM.sink + 3;
+    if (dirty) { renderer.render(scene, camera); dirty = false; }
+  }
+
+  applyTheme(); resize(); loadState(); setView('Whole kitchen', true); renderMarks();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { dirty = true; });
+  requestAnimationFrame(loop);
+
+  window.__leeKitchen = { items, checkable, totals: { sinkEnd, lowerEnd, upperEnd, islandEnd }, counts, setView, select, setMark, encodeState, listText };
+})();
+</script>
+</body>
+</html>
