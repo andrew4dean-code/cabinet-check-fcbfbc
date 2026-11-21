@@ -167,9 +167,11 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
         <li><b>Drawn twice, ordered once:</b> W3636B, WF642, and BBC42/45-PO-L each show on both the sink wall and range wall drawings. Each is one piece.</li>
         <li><b>Same code, two rooms:</b> WF330 is used at the kitchen corner and again at the basement vanity.</li>
         <li><b>Kitchen and bath shipped as one order.</b> An extra piece in the kitchen may belong to a bathroom. Type its code above to see where it goes.</li>
-        <li><b>Toe kick:</b> the drawings say Toekick: Yes but list no toe kick part. Job photos show raw toe space. Ask the supplier whether finished toe kick was included.</li>
+        <li><b>Fridge sides:</b> each side has two pieces, a 1½" REF96 panel plus a ¼" PQTR skin on its outer face. That is 4 pieces total, 39½" across with the 36" opening.</li>
+        <li><b>Blind corner:</b> BBC42/45-PO-L is a 39" box set 5½" off the sink wall. The gap behind it is on purpose.</li>
+        <li><b>Toe kick:</b> the drawings say Toekick: Yes and draw 8 runs but list no toe kick part. Job photos show raw toe space. Ask the supplier whether finished toe kick was included.</li>
         <li><b>Island back:</b> PHLF is the panel drawn on the back of the island. The back was still raw in the Nov 20 photo.</li>
-        <li><b>Crown:</b> drawn with a joint at 96", so it takes at least 2 lengths. The run is about 186" from 192" of material, which leaves little for cuts.</li>
+        <li><b>Crown:</b> drawn with a joint at 96", so it takes at least 2 lengths. The run is about 189" with 3 mitered corners, and 2 lengths give only 192". Plan on a third length.</li>
         <li><b>REF96 fridge panels</b> come 96" tall and are drawn to about 90", so they get cut on site.</li>
         <li><b>Island location</b> has no dimension on the drawings. Its position here is scaled from a plan marked No Scale.</li>
         <li><b>Appliances</b> are shown as drawn and are not part of the cabinet order. Confirm the final fridge fits the 36" opening.</li>
@@ -356,7 +358,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   }
 
   function blindCorner(g, w) {
-    const blind = 26.7;
+    const blind = 21.2;
     bx(g, w, 4.5, 21, M.toe, w / 2, 2.25, 10.5);
     bx(g, w - 0.02, 30, 23.25, M.box, w / 2, 19.5, 11.625);
     wd(g, blind, 30, 0.75, blind / 2, 19.5, 23.625);
@@ -439,6 +441,12 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     return m;
   }
 
+  function sidePlate(g, code, size, x, y, z, w, rotY) {
+    const m = plate(g, code, size, x, y, z, w, w);
+    m.rotation.y = rotY; m.userData.side = true;
+    return m;
+  }
+
   function fr(n) {
     const w = Math.floor(n + 1e-6), f = Math.round((n - w) * 8);
     const s = ['', '⅛', '¼', '⅜', '½', '⅝', '¾', '⅞'][f];
@@ -466,7 +474,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
       const py = def.plateY != null ? def.plateY : def.y ? def.h / 2 : 19;
       plate(g, def.code, def.size || fr(def.w), def.plateX != null ? def.plateX : def.w / 2, py, def.plateZ || 24.2, Math.min(def.w - 1.4, def.plateW || 13));
     }
-    const item = { ...def, wall, area, start, group: g, id: items.length };
+    const item = { ...def, wall, area, start, group: g, id: items.length, labelled: def.labelled || (def.plate !== false && def.w >= 9) };
     g.userData.item = item; items.push(item);
     return item;
   }
@@ -479,7 +487,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
 
   const baseFacts = { h: 34.5, d: 24 };
   const sinkEnd = run('sink', 'Sink wall', 2.5, [
-    { code: 'BSKIN', name: 'End panel, left side of sink run', w: 0.25, ...baseFacts, build: (g) => panel(g, 0.25, 34.5, 24) },
+    { code: 'BSKIN', name: 'End panel, left side of sink run', w: 0.25, ...baseFacts, labelled: true, build: (g) => { panel(g, 0.25, 34.5, 24); sidePlate(g, 'BSKIN', '¼"', -0.04, 19, 12, 11, -Math.PI / 2); } },
     { code: 'DB21', name: '3-drawer base', w: 21, ...baseFacts, count: 1, build: (g) => baseCab(g, 21, THREE_DRAWER) },
     { code: 'CDT845P2NS1', name: 'Dishwasher', w: 23.75, layer: 'appliance', appliance: 1, build: (g) => dishwasher(g, 23.75) },
     { code: 'SB36FB', name: 'Sink base, false drawer front and 2 doors', w: 36, ...baseFacts, count: 1, build: (g) => baseCab(g, 36, [[7.5, 'false'], [22.5, 'doors']]) },
@@ -488,15 +496,16 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   ]);
 
   const lowerEnd = run('range', 'Range wall, base', 0, [
-    { code: 'BBC42/45-PO-L', name: 'Blind corner base, door hinged left', note: 'Shows on both the sink wall and range wall drawings. It is one cabinet. Part of it hides behind the sink run.', w: 44.5, size: '42" to 45"', ...baseFacts, count: 1, plateX: 35.6, plateW: 15.5, build: (g) => blindCorner(g, 44.5) },
+    { gap: 5.5 },
+    { code: 'BBC42/45-PO-L', name: 'Blind corner base, door hinged left', note: 'Shows on both the sink wall and range wall drawings. It is one cabinet. The 39" box sits 5½" off the sink wall, and its blind end hides behind the sink run.', w: 39, ...baseFacts, count: 1, plateX: 30.1, plateW: 15.5, build: (g) => blindCorner(g, 39) },
     { code: 'BF09PO', name: '9" base with full-height door and pull-out', w: 9, ...baseFacts, count: 1, plateW: 8, build: (g) => baseCab(g, 9, [[30, 'pullout']]) },
     { code: 'C2S900P2MS1', name: 'Range', w: 29.875, h: 36.25, layer: 'appliance', appliance: 1, plateY: 19.5, plateZ: 27.2, build: (g) => range(g, 29.875) },
     { code: 'DB24', name: '3-drawer base', w: 24, ...baseFacts, count: 1, build: (g) => baseCab(g, 24, THREE_DRAWER) },
-    { code: 'PQTR', name: 'Quarter-inch skin, fridge side', w: 0.25, h: 90, build: (g) => panel(g, 0.25, 90, 24) },
-    { code: 'REF96', name: 'Fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
+    { code: 'PQTR', name: '¼" skin on left fridge panel, DB24 side', note: 'There is one on each side of the fridge, on the outer face of the REF96 panel. On this side it sits between the REF96 and DB24, so it is hard to see once installed.', w: 0.25, h: 90, d: 24, build: (g) => panel(g, 0.25, 90, 24) },
+    { code: 'REF96', name: 'Left fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
     { code: 'GYE22GYNFS', name: 'Refrigerator', w: 36, size: '36" opening', h: 70.5, layer: 'appliance', appliance: 1, plateY: 50, plateZ: 28.1, plateX: 9.5, plateW: 15, build: (g) => fridge(g, 36) },
-    { code: 'REF96', name: 'Fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
-    { code: 'PQTR', name: 'Quarter-inch skin, fridge side', w: 0.25, h: 90, build: (g) => panel(g, 0.25, 90, 24) },
+    { code: 'REF96', name: 'Right fridge side panel', note: 'There is one on each side of the fridge. It comes 96" tall and is drawn to about 90", so it gets cut on site.', w: 1.5, h: 90, d: 24, build: (g) => panel(g, 1.5, 90, 24) },
+    { code: 'PQTR', name: '¼" skin on right fridge panel, exposed side', note: 'There is one on each side of the fridge, on the outer face of the REF96 panel. This one is the finished side you see at the end of the run.', w: 0.25, h: 90, d: 24, build: (g) => panel(g, 0.25, 90, 24) },
   ]);
 
   const wallFacts = (h, d = 12) => ({ h, d, y: 54 + (36 - h), layer: 'upper', plateZ: d + 0.2 });
@@ -520,14 +529,16 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     group.userData.item = item; items.push(item);
     return item;
   }
-  const crownNote = 'Drawn with a joint at 96". The full run with returns is about 186", so 2 lengths leave little for cuts. The order paperwork does not list how many lengths shipped.';
+  const crownNote = 'Drawn with a joint at 96". The run is about 189" with 3 mitered corners, so 2 lengths (192") is very tight. The order paperwork does not list how many lengths shipped.';
   const crown1 = new THREE.Group(); layers.upper.add(crown1);
   bx(crown1, 15.3, 4, 96, M.wood, ROOM.sink - 7.65, 92, 48);
-  trimItem(crown1, { code: 'CCM8-4', name: 'Crown molding, length 1 from the corner', note: crownNote, w: 96, h: 4, wall: 'range', area: 'Range wall, upper', start: 146.9 });
+  sidePlate(crown1, 'CCM8-4', 'length 1', ROOM.sink - 15.34, 92, 48, 8.6, -Math.PI / 2);
+  trimItem(crown1, { code: 'CCM8-4', name: 'Crown molding, length 1 from the corner', note: crownNote, w: 96, h: 4, wall: 'range', area: 'Range wall, upper', start: 146.9, labelled: true });
   const crown2 = new THREE.Group(); layers.upper.add(crown2);
   bx(crown2, 15.3, 4, 11.375, M.wood, ROOM.sink - 7.65, 92, 101.69);
-  bx(crown2, 27.2, 4, 39.5, M.wood, ROOM.sink - 13.6, 92, 127.125);
-  trimItem(crown2, { code: 'CCM8-4', name: 'Crown molding, length 2 over the fridge', note: crownNote, w: 96, h: 4, wall: 'range', area: 'Range wall, upper', start: 147 });
+  bx(crown2, 27.2, 4, 42.3, M.wood, ROOM.sink - 13.6, 92, 128.55);
+  sidePlate(crown2, 'CCM8-4', 'length 2', ROOM.sink - 27.24, 92, 128.55, 8.6, -Math.PI / 2);
+  trimItem(crown2, { code: 'CCM8-4', name: 'Crown molding, length 2 over the fridge', note: crownNote, w: 96, h: 4, wall: 'range', area: 'Range wall, upper', start: 147, labelled: true });
 
   const islandEnd = run('island', 'Island', 0, [
     { code: 'DB15', name: '3-drawer base', w: 15, ...baseFacts, count: 1, plateW: 12.5, build: (g) => baseCab(g, 15, THREE_DRAWER) },
@@ -538,11 +549,14 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   [[ISLAND.x - 0.125, 'BSKIN', 'Island end panel, sink-side view right', 60.1], [ISLAND.x + 60.125, 'BSKIN', 'Island end panel, sink-side view left', 60.2]].forEach(([x, code, name, start]) => {
     const g = new THREE.Group(); layers.base.add(g);
     wd(g, 0.25, 34.5, 24, x, 17.25, ISLAND.z + 12);
-    trimItem(g, { code, name, w: 0.25, h: 34.5, d: 24, wall: 'island', area: 'Island', start });
+    const out = x < ISLAND.x + 30 ? -1 : 1;
+    sidePlate(g, code, '¼"', x + out * 0.16, 19, ISLAND.z + 12, 11, out * Math.PI / 2);
+    trimItem(g, { code, name, w: 0.25, h: 34.5, d: 24, wall: 'island', area: 'Island', start, labelled: true });
   });
   const islandBack = new THREE.Group(); layers.base.add(islandBack);
   wd(islandBack, 60.5, 34.5, 0.25, ISLAND.x + 30, 17.25, ISLAND.z + 24.125, true);
-  trimItem(islandBack, { code: 'PHLF', name: 'Island back panel', note: 'Covers the back of all three island cabinets. The back was still raw in the Nov 20 job photo.', w: 60.5, h: 34.5, wall: 'island', area: 'Island', start: 60.3 });
+  sidePlate(islandBack, 'PHLF', 'island back', ISLAND.x + 30, 19, ISLAND.z + 24.29, 13, 0);
+  trimItem(islandBack, { code: 'PHLF', name: 'Island back panel', note: 'Covers the back of all three island cabinets. The back was still raw in the Nov 20 job photo.', w: 60.5, h: 34.5, wall: 'island', area: 'Island', start: 60.3, labelled: true });
 
   /* Bathroom vanities, shown on their own */
   const bathWalls = [[0, 74], [90, 38], [144, 30]];
@@ -569,6 +583,25 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     vanity('SB27FB', 'Sink base', 27, SINK_FRONT),
     { code: 'WF330', name: 'Filler to the wall, 1" showing', note: 'There are two WF330 on the job. This one is at the basement vanity. The other is at the kitchen corner.', w: 1, size: '3" ripped to 1"', h: 30, layer: 'bath', build: (g) => { bx(g, 1, 4.5, 21, M.toe, 0.5, 2.25, 10.5); wd(g, 1, 30, 0.75, 0.5, 19.5, 23.625); } },
   ]);
+
+  /* Toe kick runs: drawn in teal on the plans, with no part number */
+  const toeNote = 'Drawn on the plans with no part number, so it may not have been ordered. The runs total about 198" in the kitchen and 121" in the baths.';
+  function toeRun(name, area, wall, layer, w, cx, cz, face) {
+    const g = new THREE.Group(); layers[layer].add(g);
+    if (face === 'x') wd(g, 0.25, 4.5, w, cx, 2.25, cz, true); else wd(g, w, 4.5, 0.25, cx, 2.25, cz, true);
+    if (face === 'x') sidePlate(g, 'TOE KICK', fr(w), cx - 0.16, 2.25, cz, 8.4, -Math.PI / 2);
+    if (face === 'front') sidePlate(g, 'TOE KICK', fr(w), cx, 2.25, cz + 0.16, 8.4, 0);
+    if (face === 'back') sidePlate(g, 'TOE KICK', fr(w), cx, 2.25, cz - 0.16, 8.4, Math.PI);
+    trimItem(g, { code: 'TOE KICK', name, note: toeNote, w, h: 4.5, wall, area, start: 200 + items.length, noCode: true, labelled: true });
+  }
+  toeRun('Toe kick, left of dishwasher', 'Sink wall', 'sink', 'base', 21, 13.25, 21.125, 'front');
+  toeRun('Toe kick, sink base to corner', 'Sink wall', 'sink', 'base', 60, 77.5, 21.125, 'front');
+  toeRun('Toe kick, corner to range', 'Range wall, base', 'range', 'base', 32.5, 107.375, 37.25, 'x');
+  toeRun('Toe kick, under DB24', 'Range wall, base', 'range', 'base', 24, 107.375, 95.375, 'x');
+  toeRun('Toe kick, island front', 'Island', 'island', 'base', 60, ISLAND.x + 30, ISLAND.z + 2.875, 'back');
+  toeRun('Toe kick, vanity', 'Primary bath', 'bath', 'bath', 60, 37, 21.125, 'front');
+  toeRun('Toe kick, vanity', 'Guest bath', 'bath', 'bath', 33, 109, 21.125, 'front');
+  toeRun('Toe kick, vanity and filler', 'Basement bath', 'bath', 'bath', 28, 160, 21.125, 'front');
 
   /* Room shell */
   const shell = new THREE.Group(); scene.add(shell);
@@ -602,15 +635,15 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   const dims = new THREE.Group(); scene.add(dims);
   const dimMat = new THREE.LineBasicMaterial({ color: 0x1f2fa3, depthTest: false, transparent: true });
   const sprites = [];
-  function textSprite(text) {
+  function textSprite(text, color = '#1f2fa3', size = 0.021) {
     const c = document.createElement('canvas'), x = c.getContext('2d'), font = '600 50px "IBM Plex Mono", Menlo, monospace';
     x.font = font; const w = Math.ceil(x.measureText(text).width) + 40; c.width = w; c.height = 82;
-    x.font = font; x.fillStyle = '#1f2fa3';
+    x.font = font; x.fillStyle = color;
     if (x.roundRect) { x.beginPath(); x.roundRect(0, 0, w, 82, 12); x.fill(); } else x.fillRect(0, 0, w, 82);
     x.fillStyle = '#ffffff'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(text, w / 2, 44);
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, toneMapped: false, sizeAttenuation: false }));
-    s.userData.base = [(0.021 * w) / 82, 0.021];
+    s.userData.base = [(size * w) / 82, size];
     s.scale.set(s.userData.base[0], s.userData.base[1], 1); s.renderOrder = 20; sprites.push(s);
     return s;
   }
@@ -636,6 +669,31 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   [['Primary bath, 74" wall', 37], ['Guest, 38"', 109], ['Basement, 30"', 159]].forEach(([t, x]) => {
     const s = textSprite(t); s.position.set(x, 70, 1); bathLabels.add(s);
   });
+
+  /* Callout tags for pieces too narrow to carry a label */
+  const calloutLine = new THREE.LineBasicMaterial({ color: 0xb45309, depthTest: false, transparent: true });
+  function callout(item, anchor, label) {
+    const g = new THREE.Group(); g.userData.plate = true; g.userData.side = true;
+    const A = new THREE.Vector3(...anchor), B = new THREE.Vector3(...label);
+    const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([A, B]), calloutLine);
+    l.renderOrder = 19; l.raycast = () => {};
+    const s = textSprite(item.code, item.code === 'PQTR' ? '#b0127f' : '#a84a06', 0.017); s.position.copy(B); s.raycast = () => {};
+    g.add(l, s); item.group.parent.add(g); item.labelled = true;
+  }
+  const byCode = (code, area) => items.filter((i) => i.code === code && (!area || i.area === area)).sort((p, q) => p.start - q.start);
+  const [pqL, pqR] = byCode('PQTR'), [refL, refR] = byCode('REF96');
+  callout(pqL, [104.5, 62, 107.5], [96, 50, 101]);
+  callout(refL, [104.5, 66, 108.4], [96, 44, 101]);
+  callout(refR, [104.5, 66, 145.9], [96, 50, 153]);
+  callout(pqR, [104.5, 62, 146.75], [96, 44, 153]);
+  callout(byCode('WF642')[0], [116.5, 72, 2.7], [108, 50, 9]);
+  callout(byCode('WF330', 'Sink wall')[0], [103, 24, 24.1], [92, 45, 35]);
+  const [bl, br] = byCode('BDEC', 'Primary bath'), [gl, gr] = byCode('BDEC', 'Guest bath');
+  callout(bl, [6.6, 30, 24], [5, 44, 24]);
+  callout(br, [67.4, 30, 24], [69, 44, 24]);
+  callout(gl, [92.1, 30, 24], [93, 44, 24]);
+  callout(gr, [125.9, 30, 24], [125, 44, 24]);
+  callout(byCode('WF330', 'Basement bath')[0], [173.5, 26, 24], [168, 44, 24]);
   function applyFov(f) {
     camera.fov = f; camera.updateProjectionMatrix();
     const k = Math.tan(THREE.MathUtils.degToRad(f / 2)) / Math.tan(THREE.MathUtils.degToRad(18));
@@ -668,6 +726,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   const card = document.getElementById('card');
   const counts = { cabinets: items.filter((i) => i.count).length, appliances: items.filter((i) => i.appliance).length };
   const checkable = items.filter((i) => !i.appliance);
+  const coded = checkable.filter((i) => !i.noCode).length;
   let marks = {}, extras = [], filter = 'All';
   const STORE = 'lee-kitchen-check-v1';
   const $ = (id) => document.getElementById(id);
@@ -679,9 +738,9 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   }
   function decodeState(str) {
     const m = /^c=([012]+)(?:~(.*))?$/.exec(str || '');
-    if (!m || m[1].length !== checkable.length) return false;
+    if (!m || m[1].length > checkable.length) return false;
     marks = {};
-    checkable.forEach((it, n) => { const v = +m[1][n]; if (v) marks[it.id] = v; });
+    checkable.forEach((it, n) => { const v = +(m[1][n] || 0); if (v) marks[it.id] = v; });
     extras = (m[2] || '').split(',').filter(Boolean).slice(0, 40).map((x) => { try { return cleanCode(decodeURIComponent(x)); } catch (e) { return ''; } }).filter(Boolean);
     return true;
   }
@@ -796,7 +855,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   function renderCard() {
     if (!selected) {
       card.innerHTML = `<h2>How to use this</h2>
-        <p style="margin:0">The drawings call for <b>${checkable.length} pieces</b>: ${counts.cabinets} cabinets and ${checkable.length - counts.cabinets} fillers, panels, and trim. Tap a piece to see where it goes, then mark it Here or Missing. Missing pieces turn red in the model.</p>`;
+        <p style="margin:0">The drawings label <b>${coded} pieces</b>: ${counts.cabinets} cabinets and ${coded - counts.cabinets} fillers, panels, and trim. They also draw <b>${checkable.length - coded} toe kick runs</b> with no part number. Tap a piece to see where it goes, then mark it Here or Missing. Missing pieces turn red. Use <b>Side pieces</b> to see every filler and panel in orange, with the PQTR skins in pink.</p>`;
       return;
     }
     const i = selected, facts = [['Width', i.size || fr(i.w)]];
@@ -837,13 +896,34 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     items.find((i) => i.code === 'CVM517P2MS1').group.visible = !on;
     syncLayers();
   }
-  let bathMode = false;
+  let bathMode = false, sideMode = false;
+  const ghostMat = new THREE.MeshStandardMaterial({ color: 0xcfc8bd, transparent: true, opacity: 0.2, depthWrite: false });
+  const sideMat = new THREE.MeshBasicMaterial({ color: 0xf08a12, transparent: true, opacity: 0.88 });
+  const pqMat = new THREE.MeshBasicMaterial({ color: 0xd11f96 });
   function setBath(on) { bathMode = on; syncLayers(); }
+  function setSide(on) {
+    if (on === sideMode) return;
+    sideMode = on;
+    items.filter((i) => i.count || i.appliance).forEach((i) => i.group.traverse((o) => {
+      if (!o.isMesh || o.userData.plate) return;
+      if (on) { o.userData.mat = o.material; o.material = ghostMat; } else if (o.userData.mat) o.material = o.userData.mat;
+    }));
+    checkable.filter((i) => !i.count && i.wall !== 'bath').forEach((i) => {
+      if (!i.sideOv) {
+        const m = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), i.code === 'PQTR' ? pqMat : sideMat);
+        const b = boxOf(i), fridgeSide = i.code === 'PQTR' || i.code === 'REF96';
+        if (i.code === 'PQTR') { if (i === pqL) b.min.z -= 0.6; else b.max.z += 0.6; }
+        m.raycast = () => {}; fit(m, b, fridgeSide ? 0.04 : 0.7); i.group.parent.add(m); i.sideOv = m;
+      }
+      i.sideOv.visible = on;
+    });
+    syncLayers();
+  }
   function syncLayers() {
     layers.base.visible = !bathMode;
     layers.upper.visible = !bathMode && inputs.upper.checked;
     layers.appliance.visible = !bathMode && inputs.appliance.checked;
-    layers.counter.visible = !bathMode && inputs.counter.checked;
+    layers.counter.visible = !bathMode && !sideMode && inputs.counter.checked;
     dims.visible = !bathMode && inputs.dims.checked;
     shell.visible = !bathMode;
     layers.bath.visible = bathMode;
@@ -861,7 +941,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
       const w = document.createElement('div'); w.className = 'item'; w.dataset.id = i.id;
       const r = document.createElement('button'); r.type = 'button'; r.className = 'row'; r.dataset.id = i.id;
       r.innerHTML = `<span class="c">${i.code}</span><span class="d">${i.size || fr(i.w)}</span><span class="n">${i.name}</span>`;
-      r.addEventListener('click', () => { setTop(false); setBath(i.wall === 'bath'); ensureVisible(i); setView(null); select(i, true); });
+      r.addEventListener('click', () => { setTop(false); setSide(false); setBath(i.wall === 'bath'); ensureVisible(i); setView(null); select(i, true); });
       w.appendChild(r);
       w.insertAdjacentHTML('beforeend', i.appliance ? '<span class="tag">Appliance</span>' : markButtons(i));
       list.appendChild(w);
@@ -869,10 +949,10 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   });
 
   /* Layer toggles */
-  const TOGGLES = [['upper', 'Wall cabinets'], ['appliance', 'Appliances'], ['counter', 'Countertops'], ['dims', 'Measurements'], ['labels', 'Cabinet labels']];
+  const TOGGLES = [['upper', 'Wall cabinets'], ['appliance', 'Appliances'], ['counter', 'Countertops'], ['dims', 'Measurements'], ['labels', 'All labels']];
   const togglesEl = document.getElementById('toggles');
   const inputs = {};
-  function setPlates(v) { scene.traverse((o) => { if (o.userData.plate) o.visible = v; }); }
+  function setPlates(v) { scene.traverse((o) => { if (o.userData.plate) o.visible = v && (!sideMode || !!o.userData.side); }); }
   TOGGLES.forEach(([k, label]) => {
     const l = document.createElement('label'), inp = document.createElement('input');
     inp.type = 'checkbox'; inp.checked = true; inp.id = 'show-' + k; inputs[k] = inp;
@@ -896,6 +976,8 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     'Range wall': { dir: [-126, 86, 0], t: [116, 44, 76], w: 170, h: 112 },
     'Island': { dir: [0, 65, -71], t: [36, 18, 75], w: 76, h: 56 },
     'From above': { dir: [0, 1, 0.0006], t: [64, 0, 76], w: 168, h: 182 },
+    'Side pieces': { dir: [-130, 96, 166], t: [62, 38, 74], w: 196, h: 136 },
+    'Fridge sides': { dir: [-112, 34, 34], t: [116, 46, 127], w: 74, h: 104 },
     'Bathrooms': { dir: [0, 34, 150], t: [87, 38, 0], w: 186, h: 104 },
   };
   const viewsEl = document.getElementById('views');
@@ -910,6 +992,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
     if (!name) return;
     setTop(name === 'From above');
     setBath(name === 'Bathrooms');
+    setSide(name === 'Side pieces' || name === 'Fridge sides');
     showDims(name);
     const fov = name === 'From above' ? 14 : 36;
     const v = VIEWS[name], tan = Math.tan(THREE.MathUtils.degToRad(fov / 2));
@@ -1007,7 +1090,7 @@ h2 { margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { dirty = true; });
   requestAnimationFrame(loop);
 
-  window.__leeKitchen = { items, checkable, totals: { sinkEnd, lowerEnd, upperEnd, islandEnd }, counts, setView, select, setMark, encodeState, listText };
+  window.__leeKitchen = { items, checkable, totals: { sinkEnd, lowerEnd, upperEnd, islandEnd }, counts, coded, setView, select, setMark, encodeState, listText };
 })();
 </script>
 </body>
